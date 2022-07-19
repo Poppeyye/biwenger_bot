@@ -1,8 +1,6 @@
 import logging
 import os
 
-from telegram import __version__ as TG_VER
-
 from biwenger.notices import MarketNotice
 from biwenger.session import BiwengerApi
 
@@ -12,11 +10,7 @@ except ImportError:
     __version_info__ = (0, 0, 0, 0, 0)  # type: ignore[assignment]
 
 if __version_info__ < (20, 0, 0, "alpha", 1):
-    raise RuntimeError(
-        f"This example is not compatible with your current PTB version {TG_VER}. To view the "
-        f"{TG_VER} version of this example, "
-        f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
-    )
+    raise RuntimeError("Incompatible version")
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -26,12 +20,6 @@ logging.basicConfig(
 )
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-# Best practice would be to replace context with an underscore,
-# since context is an unused local variable.
-# This being an example and not having context present confusing beginners,
-# we decided to have it present as context.
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
     await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
@@ -84,8 +72,17 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def init_biwenger_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    await update.message.reply_text("Connection to liga succesfull")
-    await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()))
+    await update.message.reply_text('[tag](link))', parse_mode='MarkdownV2')
+    # await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()))
+
+
+async def run_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Add a job to the queue."""
+    chat_id = update.effective_message.chat_id
+    context.job_queue.run_repeating(alarm, interval=5, chat_id=chat_id, name=str(chat_id))
+    text = "Timer successfully set!"
+    await update.effective_message.reply_text(text)
+
 
 def main() -> None:
     """Run bot."""
@@ -93,8 +90,8 @@ def main() -> None:
     application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
 
     # on different commands - answer in Telegram
-    application.add_handler(CommandHandler("biwenger", init_biwenger_session))
-
+    # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
+    application.add_handler(CommandHandler("run_task", run_task))
 
 # Run the bot until the user presses Ctrl-C
     application.run_polling()
