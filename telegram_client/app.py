@@ -1,4 +1,5 @@
 import logging
+import os
 
 from telegram import __version__ as TG_VER
 
@@ -82,14 +83,14 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def init_biwenger_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
+    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
     await update.message.reply_text("Connection to liga succesfull")
     await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()))
 
 def main() -> None:
     """Run bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token("5062678434:AAF78Vjz0d9zRCM41Gq63BY7UaYIDFXaF4k").build()
+    application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("biwenger", init_biwenger_session))
