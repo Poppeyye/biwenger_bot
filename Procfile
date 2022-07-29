@@ -1,1 +1,1 @@
-python telegram_client/app.py
+worker: python telegram_client/app.py
