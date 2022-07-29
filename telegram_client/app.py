@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -85,17 +86,20 @@ async def run_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.effective_message.reply_text(text)
 
 
-def main() -> None:
+async def main() -> None:
     """Run bot."""
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
     # on different commands - answer in Telegram
-    application.add_handler(CommandHandler("biwenger", init_biwenger_session))
+    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
+
+    await application.bot.send_message(chat_id='-1001673290336', text=MarketNotice().show(biwenger.get_players_in_market()), parse_mode='Markdown')
+    # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
     # application.add_handler(CommandHandler("run_task", run_task))
 
 
 # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    #application.run_polling()
 
 
 async def send_message_to_chat_id():
@@ -105,5 +109,5 @@ async def send_message_to_chat_id():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
     #asyncio.run(send_message_to_chat_id())
