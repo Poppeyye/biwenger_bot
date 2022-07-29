@@ -2,9 +2,12 @@ import json
 import logging as logger
 from functools import lru_cache
 from operator import itemgetter
+from typing import List, Dict
 
 import requests_cache
 import requests as requests
+
+from biwenger.notices import Notice, MarketNotice, TransfersNotice
 
 url_login = 'https://biwenger.as.com/api/v2/auth/login'
 url_account = 'https://biwenger.as.com/api/v2/account'
@@ -86,7 +89,14 @@ class BiwengerApi:
         top_n_players = sorted(list(all_players.values()), key=itemgetter('price'), reverse=True)[:20]
         for p in top_n_players:
             if int(player_id) == p['id']:
-                print("hola")
+                return True
+        return False
+
+    def _is_top_player(self, player_id) -> bool:
+        all_players = self.get_all_players_in_league()
+        top_n_players = sorted(list(all_players.values()), key=itemgetter('points'), reverse=True)[:20]
+        for p in top_n_players:
+            if int(player_id) == p['id']:
                 return True
         return False
 
@@ -99,15 +109,21 @@ class BiwengerApi:
         all_players = json.loads(req_format)['data']['players']
         return all_players
 
-    def get_last_user_transfers(self):
+    def get_last_user_transfers(self) -> List[List[Dict]]:
         _, headers = self.get_account_info()
-        req = requests.get(url_transfers, headers=headers).text
-        req_format = req.replace("jsonp_1465365486(","")[:-1]
-        all_players = json.loads(req_format)['data']['players']
-        return all_players
+        transfers = requests.get(url_transfers, headers=headers).text
+        movs = []
+        all_players = self.get_all_players_in_league()
+        for day in json.loads(transfers)['data']:
+            content = day["content"]
+            for mov in content:
+                mov.update(all_players[str(mov["player"])])
+            movs.append(content)
+        return movs
 
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
-    players_mkt = biwenger.get_players_in_market()
+    print(MarketNotice().show(biwenger.get_players_in_market()))
+    print(TransfersNotice().show(biwenger.get_last_user_transfers()))
 

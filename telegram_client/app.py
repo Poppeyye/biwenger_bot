@@ -1,7 +1,8 @@
+import asyncio
 import logging
 import os
 
-from biwenger.notices import MarketNotice
+from biwenger.notices import MarketNotice, TransfersNotice
 from biwenger.session import BiwengerApi
 
 try:
@@ -67,13 +68,14 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.message.chat_id
     job_removed = remove_job_if_exists(str(chat_id), context)
     text = "Timer successfully cancelled!" if job_removed else "You have no active timer."
-    await update.message.reply_text(text)
+    await update.effective_message.reply_text(text)
 
 
 async def init_biwenger_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    await update.message.reply_text('[tag](link))', parse_mode='MarkdownV2')
-    # await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()))
+    # await update.message.reply_text('[tag](link))', parse_mode='MarkdownV2')
+    await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()), parse_mode='Markdown')
+    await update.message.reply_text(TransfersNotice().show(biwenger.get_last_user_transfers()), parse_mode='Markdown')
 
 
 async def run_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -88,14 +90,21 @@ def main() -> None:
     """Run bot."""
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
-
     # on different commands - answer in Telegram
-    # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
-    application.add_handler(CommandHandler("run_task", run_task))
+    application.add_handler(CommandHandler("biwenger", init_biwenger_session))
+    # application.add_handler(CommandHandler("run_task", run_task))
+
 
 # Run the bot until the user presses Ctrl-C
     application.run_polling()
 
 
+async def send_message_to_chat_id():
+    application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
+    await application.bot.sendDice('-1001673290336')
+    #await application.bot.send_message(chat_id='-1001673290336', text="estoy enamorado de @Sara")
+
+
 if __name__ == "__main__":
     main()
+    #asyncio.run(send_message_to_chat_id())
