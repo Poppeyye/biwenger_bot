@@ -17,7 +17,6 @@ url_retire_market = "https://biwenger.as.com/api/v2/market?player="
 url_add_player_market = "https://biwenger.as.com/api/v2/market"
 url_all_players = "https://cf.biwenger.com/api/v2/competitions/la-liga/data?lang=es&score=5&callback=jsonp_1465365486"
 url_ranking = "https://biwenger.as.com/api/v2/rounds/league"
-url_player_stats = "https://biwenger.as.com/api/v2/owners/player/luis-maximiano"
 url_movement_notice = "https://biwenger.as.com/api/v2/league/742220/board?type=playerMovements,teamMovements&limit=8"
 url_transfers = "https://biwenger.as.com/api/v2/league/742220/board?type=transfer,market,exchange,loan,loanReturn,clauseIncrement&limit=8"
 
@@ -121,9 +120,19 @@ class BiwengerApi:
             movs.append(content)
         return movs
 
+    def get_player_extended_information(self, id_player: str):
+        url_player_info = "https://biwenger.as.com/api/v2/players/la-liga/benzema?" \
+                          "https://cf.biwenger.com/api/v2/players/la-liga/benzema?" \
+                          "lang=es&fields=*,team,fitness,reports(points,home,events,status(status,statusInfo)," \
+                          "match(*,round,home,away),star),prices,competition,seasons,news,threads&callback=jsonp_1505664437"
+        _, headers = self.get_account_info()
+        info = requests.get(url_player_info, headers=headers).text
+        info_format = json.loads(info)['data'][id_player]
+        return info_format
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
+    biwenger.get_player_extended_information('')
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
 
