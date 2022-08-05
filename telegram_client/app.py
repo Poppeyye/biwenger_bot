@@ -92,6 +92,10 @@ async def main() -> None:
     application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
     # on different commands - answer in Telegram
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
+    # chat id private 855531130
+    # chat id group -1001673290336
+    #await application.bot.send_message(chat_id='855531130', text='<a href="#"><span class="tg-spoiler">spoiler</span> </a>',parse_mode='HTML')
+
     await application.bot.send_message(chat_id='-1001673290336', text=MarketNotice().show(biwenger.get_players_in_market()), parse_mode='Markdown')
     await application.bot.send_message(chat_id='-1001673290336', text=TransfersNotice().show(biwenger.get_last_user_transfers()), parse_mode='Markdown')
     # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
