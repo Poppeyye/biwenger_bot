@@ -104,7 +104,7 @@ class BiwengerApi:
         session = requests_cache.CachedSession('cache-requests', cache_control=True)
 
         req = session.get(url_all_players, headers=headers).text
-        req_format = req.replace("jsonp_1465365486(","")[:-1]
+        req_format = req.replace("jsonp_1465365486(", "")[:-1]
         all_players = json.loads(req_format)['data']['players']
         return all_players
 
@@ -116,7 +116,12 @@ class BiwengerApi:
         for day in json.loads(transfers)['data']:
             content = day["content"]
             for mov in content:
-                mov.update(all_players[str(mov["player"])])
+                try:
+                    info_player = all_players[str(mov["player"])]
+                    mov.update(info_player)
+                except:
+                    print(f'Player {mov["player"]} not found')
+            content = list(filter(lambda x: len(x) > 4, content))
             movs.append(content)
         return movs
 
@@ -130,9 +135,9 @@ class BiwengerApi:
         info_format = json.loads(info)['data'][id_player]
         return info_format
 
+
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
     biwenger.get_player_extended_information('')
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
-
