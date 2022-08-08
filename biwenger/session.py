@@ -78,6 +78,7 @@ class BiwengerApi:
             p = offer['player']['id']
             player = all_players[str(p)]
             offer.update(player)
+            offer.update(self.get_player_extended_information(str(p)))
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
@@ -108,7 +109,7 @@ class BiwengerApi:
         all_players = json.loads(req_format)['data']['players']
         return all_players
 
-    def get_last_user_transfers(self) -> List[List[Dict]]:
+    def get_last_user_transfers(self) -> List[Dict]:
         _, headers = self.get_account_info()
         transfers = requests.get(url_transfers, headers=headers).text
         movs = []
@@ -122,22 +123,26 @@ class BiwengerApi:
                 except:
                     print(f'Player {mov["player"]} not found')
             content = list(filter(lambda x: len(x) > 4, content))
-            movs.append(content)
+            movs.append({'date': day['date'], 'content': content})
         return movs
 
     def get_player_extended_information(self, id_player: str):
-        url_player_info = "https://biwenger.as.com/api/v2/players/la-liga/benzema?" \
-                          "https://cf.biwenger.com/api/v2/players/la-liga/benzema?" \
+        url_player_info = f"https://biwenger.as.com/api/v2/players/la-liga/{id_player}?" \
+                          f"https://cf.biwenger.com/api/v2/players/la-liga/{id_player}?" \
                           "lang=es&fields=*,team,fitness,reports(points,home,events,status(status,statusInfo)," \
                           "match(*,round,home,away),star),prices,competition,seasons,news,threads&callback=jsonp_1505664437"
         _, headers = self.get_account_info()
-        info = requests.get(url_player_info, headers=headers).text
-        info_format = json.loads(info)['data'][id_player]
-        return info_format
+        session = requests_cache.CachedSession('extended_info', cache_control=True)
+        info = session.get(url_player_info, headers=headers).text
+        info_format = json.loads(info)['data']
+        sofascore_url = info_format['partner']['2']["url"]
+        canonical_url = info_format['canonicalURL']
+        url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
+        return {"url": url}
 
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
-    #biwenger.get_player_extended_information('')
+
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
