@@ -138,6 +138,6 @@ class BiwengerApi:
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
-    biwenger.get_player_extended_information('')
+    #biwenger.get_player_extended_information('')
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
