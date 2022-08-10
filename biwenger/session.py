@@ -140,6 +140,15 @@ class BiwengerApi:
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         return {"url": url}
 
+    def get_matches_info(self):
+        url_matches = 'https://cf.biwenger.com/api/v2/rounds/la-liga?score=5&lang=es&v=619&callback=jsonp_190019889'
+        _, headers = self.get_account_info()
+
+        req = requests.get(url_matches, headers=headers).text
+        req_format = req.replace("jsonp_190019889(", "")[:-1]
+        matches = json.loads(req_format)
+        return matches
+
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
