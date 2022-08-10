@@ -109,7 +109,7 @@ class BiwengerApi:
         all_players = json.loads(req_format)['data']['players']
         return all_players
 
-    def get_last_user_transfers(self) -> List[List[Dict]]:
+    def get_last_user_transfers(self) -> List[Dict]:
         _, headers = self.get_account_info()
         transfers = requests.get(url_transfers, headers=headers).text
         movs = []
@@ -123,7 +123,7 @@ class BiwengerApi:
                 except:
                     print(f'Player {mov["player"]} not found')
             content = list(filter(lambda x: len(x) > 4, content))
-            movs.append(content)
+            movs.append({'date': day['date'], 'content': content})
         return movs
 
     def get_player_extended_information(self, id_player: str):
@@ -135,8 +135,10 @@ class BiwengerApi:
         session = requests_cache.CachedSession('extended_info', cache_control=True)
         info = session.get(url_player_info, headers=headers).text
         info_format = json.loads(info)['data']
-
-        return {"url": info_format['partner']['2']["url"]}
+        sofascore_url = info_format['partner']['2']["url"]
+        canonical_url = info_format['canonicalURL']
+        url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
+        return {"url": url}
 
 
 if __name__ == '__main__':
