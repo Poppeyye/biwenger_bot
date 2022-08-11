@@ -15,9 +15,9 @@ class Notice:
 
     @staticmethod
     def is_last_day_notice(log):
-        return (date.today()).strftime('%Y-%m-%d') == datetime.utcfromtimestamp(log['date']).strftime('%Y-%m-%d') or \
-               (date.today() - timedelta(days=1)).strftime('%Y-%m-%d') == \
-               datetime.utcfromtimestamp(log['date']).strftime('%Y-%m-%d')
+        return (date.today()).strftime('%Y-%m-%d-%h') == datetime.utcfromtimestamp(log['date']).strftime('%Y-%m-%d-%h') or \
+               (date.today() - timedelta(hours=9)).strftime('%Y-%m-%d-%h') == \
+               datetime.utcfromtimestamp(log['date']).strftime('%Y-%m-%d-%h')
 
 
 class MarketNotice(Notice):
