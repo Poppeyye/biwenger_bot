@@ -7,7 +7,7 @@ from typing import List, Dict
 import requests_cache
 import requests as requests
 
-from biwenger.notices import Notice, MarketNotice, TransfersNotice
+from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice
 
 url_login = 'https://biwenger.as.com/api/v2/auth/login'
 url_account = 'https://biwenger.as.com/api/v2/account'
@@ -147,11 +147,11 @@ class BiwengerApi:
         req = requests.get(url_matches, headers=headers).text
         req_format = req.replace("jsonp_190019889(", "")[:-1]
         matches = json.loads(req_format)
-        return matches
+        return matches['data']
 
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
-
+    print(MatchNotice().show(biwenger.get_matches_info()))
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
