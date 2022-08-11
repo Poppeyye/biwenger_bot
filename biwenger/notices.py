@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, date,timedelta
+from enum import Enum
 from typing import List, Dict
 
 
@@ -29,7 +30,8 @@ class MarketNotice(Notice):
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
                 points_last = sum(filter(None, log['fitness']))
-                message = [f'*{user}*', "vende a", f'[{log["name"]}]({log["url"]})', "por",
+                pos = log['position']
+                message = [f'*{user}*', "vende a", f'[{log["name"]} ({Position(pos).name})]({log["url"]})', "por",
                            "{:,}€".format((log["price"])),
                            f'Last 5 sum: {str(points_last)}',
                            f'Total: {str(log["points"])}', "\n"]
@@ -91,3 +93,10 @@ class MatchNotice(Notice):
             return True
         else:
             return False
+
+
+class Position(Enum):
+    PT = 1
+    DF = 2
+    MC = 3
+    DL = 4
