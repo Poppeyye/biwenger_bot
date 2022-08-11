@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, date,timedelta
-from typing import List
+from typing import List, Dict
+
 
 class Notice:
     def template(self):
@@ -67,3 +68,26 @@ class TransfersNotice(Notice):
                         prompted.append(" ".join(message))
         prompted.insert(0, self.template())
         return "\n".join(prompted)
+
+
+class MatchNotice(Notice):
+    def template(self):
+        return "*Hoy es día de Jornada!!* " + u'\U000026BD'
+
+    def show(self, data):
+        prompted = []
+        if self.is_match_day(data['games']):
+            message = ['Toda la info de la jornada aquí ->', f'[{data["name"]}]({data["canonicalURL"]})']
+            prompted.append(" ".join(message))
+
+        else:
+            return None
+        prompted.insert(0, self.template())
+        return "\n".join(prompted)
+
+    @staticmethod
+    def is_match_day(games: List[Dict]) -> bool:
+        if datetime.utcfromtimestamp(games[0]['date']).strftime('%Y-%m-%d') == (date.today()).strftime('%Y-%m-%d'):
+            return True
+        else:
+            return False
