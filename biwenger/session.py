@@ -1,5 +1,6 @@
 import json
 import logging as logger
+import os
 from functools import lru_cache
 from operator import itemgetter
 from typing import List, Dict
@@ -138,7 +139,10 @@ class BiwengerApi:
         sofascore_url = info_format['partner']['2']["url"]
         canonical_url = info_format['canonicalURL']
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
-        return {"url": url}
+        last_5_prices = [price[1] for price in info_format['prices'][-5:]]
+        price_variance = ((last_5_prices[4]-last_5_prices[0])/last_5_prices[0])*100
+
+        return {"url": url, "price_increment": "{:.2f}".format(price_variance)}
 
     def get_matches_info(self):
         url_matches = 'https://cf.biwenger.com/api/v2/rounds/la-liga?score=5&lang=es&v=619&callback=jsonp_190019889'
@@ -151,7 +155,7 @@ class BiwengerApi:
 
 
 if __name__ == '__main__':
-    biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
+    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
     print(MatchNotice().show(biwenger.get_matches_info()))
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
