@@ -1,5 +1,6 @@
 import json
 import logging as logger
+import os
 from functools import lru_cache
 from operator import itemgetter
 from typing import List, Dict
@@ -154,7 +155,7 @@ class BiwengerApi:
 
 
 if __name__ == '__main__':
-    biwenger = BiwengerApi('alvarito174@hotmail.com', 'tomado74')
+    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
     print(MatchNotice().show(biwenger.get_matches_info()))
     print(MarketNotice().show(biwenger.get_players_in_market()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
