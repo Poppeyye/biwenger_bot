@@ -96,17 +96,17 @@ async def main() -> None:
     group_chat = '-1001673290336'
     #await application.bot.send_message(chat_id='855531130', text='<a href="#"><span class="tg-spoiler">spoiler</span> </a>',parse_mode='HTML')
 
-    await application.bot.send_message(chat_id=group_chat, text=MarketNotice().
+    await application.bot.send_message(chat_id=private_chat, text=MarketNotice().
                                        show(biwenger.get_players_in_market()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
-    await application.bot.send_message(chat_id=group_chat, text=TransfersNotice().
+    await application.bot.send_message(chat_id=private_chat, text=TransfersNotice().
                                        show(biwenger.get_last_user_transfers()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
     matches = MatchNotice().show(biwenger.get_matches_info())
     if matches:
-        await application.bot.send_message(chat_id=group_chat, text=matches,
+        await application.bot.send_message(chat_id=private_chat, text=matches,
                                            disable_web_page_preview=True,
                                            parse_mode='Markdown')
     # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
