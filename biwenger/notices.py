@@ -51,7 +51,12 @@ class MarketNotice(Notice):
                            f'_Total points_: {str(log["points"])}\n',
                            f'_Last 5d sum_: {str(points_last)}\n',
                            f'_Price trend 5d_: {log["price_increment"]}%',
-                           self.trend_emote(log["price_increment"]) + "\n"]
+                           self.trend_emote(log["price_increment"]) + "\n",
+                           f'*2021-2022 Stats: * \n'
+                           f'_Total points_: {log["total_points_last"]}\n',
+                           f'_Matches played_: {log["matches_played_last"]}\n'
+                           f'_Relative Avg points_: {log["avg_points_per_match"]}\n',
+                           f'_Absolute avg points_: {log["avg_total_points"]}\n',]
                 if float(log['price_increment']) > 5.0:
                     message.append(u'\U0001F915')
                 if "is_high_cost" in log.keys():

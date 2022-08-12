@@ -140,9 +140,22 @@ class BiwengerApi:
         canonical_url = info_format['canonicalURL']
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
-        price_variance = ((last_5_prices[4]-last_5_prices[0])/last_5_prices[0])*100
-
-        return {"url": url, "price_increment": "{:.2f}".format(price_variance)}
+        last_season = [s for s in info_format['seasons'] if s['id'] == '2022'][0]
+        matches_last_season = last_season['games']
+        points_last_season = last_season['points'] if 'points' in last_season \
+                                                      and isinstance(last_season['points'], str) else 0.0
+        try:
+            real_avg_points = float(points_last_season) / float(matches_last_season)
+        except:
+            real_avg_points = 0.0
+        price_variance = ((last_5_prices[4] - last_5_prices[0]) / last_5_prices[0]) * 100
+        avg_points_total = float(points_last_season) / 34
+        return {"url": url,
+                "price_increment": "{:.2f}".format(price_variance),
+                "avg_points_per_match": "{:.2f}".format(real_avg_points),
+                "avg_total_points": "{:.2f}".format(avg_points_total),
+                "total_points_last": str(points_last_season),
+                "matches_played_last": matches_last_season}
 
     def get_matches_info(self):
         url_matches = 'https://cf.biwenger.com/api/v2/rounds/la-liga?score=5&lang=es&v=619&callback=jsonp_190019889'
