@@ -25,6 +25,20 @@ class MarketNotice(Notice):
     def template(self):
         return f"*Actualización diaria del mercado {date.today().strftime('%Y-%m-%d')}: * \n"
 
+    @staticmethod
+    def trend_emote(trend_qty: str):
+        t = float(trend_qty)
+        if t > 10.0:
+            return 2 * '\U00002B06'
+        if 10.0 > t > 5.0:
+            return '\U00002B06'
+        elif 5.0 > t > 0.0:
+            return "\U00002197"
+        elif t == 0.0:
+            return "\U000027A1"
+        else:
+            return "\U00002B07"
+
     def show(self, data):
         prompted = []
         for log in data:
@@ -36,7 +50,10 @@ class MarketNotice(Notice):
                            "{:,}€".format((log["price"])), "\n",
                            f'_Total points_: {str(log["points"])}\n',
                            f'_Last 5d sum_: {str(points_last)}\n',
-                           f'_Price trend 5d_: {log["price_increment"]}%\n']
+                           f'_Price trend 5d_: {log["price_increment"]}%',
+                           self.trend_emote(log["price_increment"]) + "\n"]
+                if float(log['price_increment']) > 5.0:
+                    message.append(u'\U0001F915')
                 if "is_high_cost" in log.keys():
                     message.append("y aparece en el *top 20 + caros* del mercado\n")
                 if "statusInfo" in log.keys():
