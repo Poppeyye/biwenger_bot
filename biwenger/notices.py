@@ -56,9 +56,7 @@ class MarketNotice(Notice):
                            f'_Total points_: {log["total_points_last"]}\n',
                            f'_Matches played_: {log["matches_played_last"]}\n'
                            f'_Relative Avg points_: {log["avg_points_per_match"]}\n',
-                           f'_Absolute avg points_: {log["avg_total_points"]}\n',]
-                if float(log['price_increment']) > 5.0:
-                    message.append(u'\U0001F915')
+                           f'_Absolute avg points_: {log["avg_total_points"]}\n']
                 if "is_high_cost" in log.keys():
                     message.append("y aparece en el *top 20 + caros* del mercado\n")
                 if "statusInfo" in log.keys():
