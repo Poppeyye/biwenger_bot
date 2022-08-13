@@ -33,36 +33,40 @@ class MarketNotice(Notice):
         if 10.0 > t > 5.0:
             return '\U00002B06'
         elif 5.0 > t > 0.0:
-            return "\U00002197"
+            return '\U00002197'
         elif t == 0.0:
-            return "\U000027A1"
+            return '\U000027A1'
         else:
-            return "\U00002B07"
+            return '\U00002B07'
 
     def show(self, data):
         prompted = []
+        temp = self.template()
+        if data[0]['user'] is None:
+            temp = temp + " *FREE AGENTS* \n"
         for log in data:
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
+
                 points_last = sum(filter(None, log['fitness']))
                 pos = log['position']
-                message = [f'*{user}*', "vende a", f'[{log["name"]} ({Position(pos).name})]({log["url"]})', "por",
+                message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",
                            f'_Total points_: {str(log["points"])}\n',
                            f'_Last 5d sum_: {str(points_last)}\n',
                            f'_Price trend 5d_: {log["price_increment"]}%',
-                           self.trend_emote(log["price_increment"]) + "\n",
-                           f'*2021-2022 Stats: * \n'
+                           self.trend_emote(log["price_increment"]) + '\n',
+                           f'*2021/2022 Stats:*\n',
                            f'_Total points_: {log["total_points_last"]}\n',
                            f'_Matches played_: {log["matches_played_last"]}\n'
-                           f'_Relative Avg points_: {log["avg_points_per_match"]}\n',
+                           f' _Relative Avg points_: {log["avg_points_per_match"]}\n',
                            f'_Absolute avg points_: {log["avg_total_points"]}\n']
                 if "is_high_cost" in log.keys():
                     message.append("y aparece en el *top 20 + caros* del mercado\n")
                 if "statusInfo" in log.keys():
-                    message.append(" ".join([u'\U0001F915', "Estado:", log['statusInfo'], "\n"]))
+                    message.append(' '.join([u'\U0001F915', 'Estado:', log["statusInfo"], '\n']))
                 prompted.append(" ".join(message))
-        prompted.insert(0, self.template())
+        prompted.insert(0, temp)
         return "\n".join(prompted)
 
 
@@ -86,7 +90,7 @@ class TransfersNotice(Notice):
                                                  "mercado desde hoy. \n"]))
 
                         if "statusInfo" in mov.keys():
-                            message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
+                            message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
                         prompted.append(" ".join(message))
                     elif "from" in mov.keys():
                         message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",

@@ -59,7 +59,7 @@ class BiwengerApi:
             logger.info("call login ok!")
             return result, headers_league
 
-    def get_players_in_market(self) -> list:
+    def get_players_in_market(self, free: bool) -> list:
         """
         Get an update of the current players in market
         Returns a list of players (dicts) with some useful information
@@ -68,12 +68,17 @@ class BiwengerApi:
         'status': 'ok', 'priceIncrement': 140000, 'playedHome': 0, 'playedAway': 0, 'fitness': [None, None, None,
         None, None], 'points': 0, 'pointsHome': 0, 'pointsAway': 0, 'pointsLastSeason': 26}
         """
+
         full_market_info = []
         account_info, headers = self.get_account_info()
         # league = account_info['data']['leagues'][1]  # Pick first one
         result = requests.get(url_add_player_market, headers=headers).json()
         market_players = result['data']['sales']
         # mkt_players_df = pd.DataFrame.from_dict(market_players)
+        if free:
+            market_players = [p for p in market_players if p['user'] is None]
+        else:
+            market_players = [p for p in market_players if p['user'] is not None]
         all_players = self.get_all_players_in_league()
         for offer in market_players:
             p = offer['player']['id']
