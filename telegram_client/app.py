@@ -95,9 +95,19 @@ async def main() -> None:
     private_chat = '855531130'
     group_chat = '-1001673290336'
     #await application.bot.send_message(chat_id='855531130', text='<a href="#"><span class="tg-spoiler">spoiler</span> </a>',parse_mode='HTML')
+    # market_notice = MarketNotice().show(biwenger.get_players_in_market(free=True)).replace("_", "\\_")\
+    #     .replace("*", "\\*") \
+    #     .replace(".", "\\.") \
+    #     .replace("[", "\\[") \
+    #     .replace("]", "\\]") \
+    #     .replace("`", "\\`").replace("-", "\\-").replace("(", "\\(").replace(")", "\\)")
+    await application.bot.send_message(chat_id=group_chat,
+                                       text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
+                                       disable_web_page_preview=True,
+                                       parse_mode='Markdown')
 
-    await application.bot.send_message(chat_id=group_chat, text=MarketNotice().
-                                       show(biwenger.get_players_in_market()),
+    await application.bot.send_message(chat_id=group_chat,
+                                       text=MarketNotice().show(biwenger.get_players_in_market(free=False)),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
     await application.bot.send_message(chat_id=group_chat, text=TransfersNotice().
