@@ -43,12 +43,12 @@ class MarketNotice(Notice):
         prompted = []
         temp = self.template()
         if data[0]['user'] is None:
-            temp = temp + " *FREE AGENTS* \n"
+            temp = temp + " *FREE AGENTS* \n" # edit template message if <free> flag is activated
         for log in data:
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
 
-                points_last = sum(filter(None, log['fitness']))
+                points_last = sum([int(p) for p in filter(None, log["fitness"])])
                 pos = log['position']
                 message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",

@@ -82,13 +82,16 @@ class BiwengerApi:
         all_players = self.get_all_players_in_league()
         for offer in market_players:
             p = offer['player']['id']
-            player = all_players[str(p)]
-            offer.update(player)
-            offer.update(self.get_player_extended_information(str(p)))
+            try:
+                player = all_players[str(p)]
+                offer.update(player)
+                offer.update(self.get_player_extended_information(str(p)))
+            except:
+                print('Player not found')
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
-        return full_market_info
+        return [f for f in full_market_info if len(f)>5]
 
     def _is_high_cost_player(self, player_id) -> bool:
         all_players = self.get_all_players_in_league()
