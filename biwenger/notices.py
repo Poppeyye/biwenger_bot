@@ -43,7 +43,7 @@ class MarketNotice(Notice):
         prompted = []
         temp = self.template()
         if data[0]['user'] is None:
-            temp = temp + " *FREE AGENTS* \n"
+            temp = temp + " *FREE AGENTS* \n" # edit template message if <free> flag is activated
         for log in data:
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
