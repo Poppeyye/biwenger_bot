@@ -48,7 +48,7 @@ class MarketNotice(Notice):
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
 
-                points_last = sum(filter(None, log['fitness']))
+                points_last = sum([int(p) for p in filter(None, log["fitness"])])
                 pos = log['position']
                 message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",
