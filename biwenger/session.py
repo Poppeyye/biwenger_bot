@@ -3,12 +3,12 @@ import logging as logger
 import os
 from functools import lru_cache
 from operator import itemgetter
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import requests_cache
 import requests as requests
 
-from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice
+from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice, RoundsNotice
 
 url_login = 'https://biwenger.as.com/api/v2/auth/login'
 url_account = 'https://biwenger.as.com/api/v2/account'
@@ -91,7 +91,7 @@ class BiwengerApi:
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
-        return [f for f in full_market_info if len(f)>5]
+        return [f for f in full_market_info if len(f) > 5]
 
     def _is_high_cost_player(self, player_id) -> bool:
         all_players = self.get_all_players_in_league()
@@ -111,12 +111,25 @@ class BiwengerApi:
 
     def get_all_players_in_league(self):
         _, headers = self.get_account_info()
-        session = requests_cache.CachedSession('cache-requests', cache_control=True)
 
-        req = session.get(url_all_players, headers=headers).text
+        req = requests.get(url_all_players, headers=headers).text
         req_format = req.replace("jsonp_1465365486(", "")[:-1]
         all_players = json.loads(req_format)['data']['players']
         return all_players
+
+    def get_next_round_time(self) -> Union[str, dict]:
+        _, headers = self.get_account_info()
+        req = requests.get(url_all_players, headers=headers).text
+        req_format = req.replace("jsonp_1465365486(", "")[:-1]
+        data = json.loads(req_format)['data']
+        events = data['events']
+        rounds = data['season']['rounds']
+        if 'active' in [r['status'] for r in rounds]:
+            return "active"
+        else:
+            next_round = [r for r in rounds if r['id'] == events[1]['round']['id']][0]
+            next_round.update({'date': events[1]['date']})
+            return next_round
 
     def get_last_user_transfers(self) -> List[Dict]:
         _, headers = self.get_account_info()
@@ -141,17 +154,24 @@ class BiwengerApi:
                           "lang=es&fields=*,team,fitness,reports(points,home,events,status(status,statusInfo)," \
                           "match(*,round,home,away),star),prices,competition,seasons,news,threads&callback=jsonp_1505664437"
         _, headers = self.get_account_info()
-        session = requests_cache.CachedSession('extended_info', cache_control=True)
-        info = session.get(url_player_info, headers=headers).text
+        info = requests.get(url_player_info, headers=headers).text
         info_format = json.loads(info)['data']
         sofascore_url = info_format['partner']['2']["url"]
         canonical_url = info_format['canonicalURL']
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
-        last_season = [s for s in info_format['seasons'] if s['id'] == '2022'][0]
-        matches_last_season = last_season['games']
+        last_season = [s for s in info_format['seasons'] if s['id'] == '2022' and s['name'] ==
+                       'Temporada 2021/2022']
+        if not last_season:
+            last_season = {'games': 0, 'points': '0'}
+        else:
+            last_season = last_season[0]
+        if 'competition' in last_season:  # bug in the game, avoid segunda división players appear in stats
+            last_season['games'] = 0
+        matches_last_season = last_season['games'] if 'games' in last_season \
+                                                      and isinstance(last_season['games'], int) else 0
         points_last_season = last_season['points'] if 'points' in last_season \
-                                                      and isinstance(last_season['points'], str) else 0.0
+                                                      and isinstance(last_season['points'], str) else '0'
         try:
             real_avg_points = float(points_last_season) / float(matches_last_season)
         except:
@@ -177,6 +197,5 @@ class BiwengerApi:
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    print(MatchNotice().show(biwenger.get_matches_info()))
-    print(MarketNotice().show(biwenger.get_players_in_market()))
+    print(RoundsNotice().show(biwenger.get_next_round_time()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))

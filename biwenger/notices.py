@@ -48,7 +48,7 @@ class MarketNotice(Notice):
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
 
-                points_last = sum([int(p) for p in filter(None, log["fitness"])])
+                points_last = sum([p for p in log['fitness'] if isinstance(p, int)])
                 pos = log['position']
                 message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",
@@ -126,6 +126,19 @@ class MatchNotice(Notice):
         else:
             return False
 
+
+class RoundsNotice(Notice):
+
+    def show(self, data):
+        if isinstance(data, str):
+            return "¡Jornada en curso!" + '\U0001f340'
+        elif isinstance(data, dict):
+            return '\U000023F1' + "Días hasta la siguiente jornada: " + str(self.days_diff(data['date']))
+
+    @staticmethod
+    def days_diff(d):
+        days = datetime.utcfromtimestamp(d) - datetime.today()
+        return " ".join([str(days.days), 'días', str(days.seconds // 3600), 'horas'])
 
 class Position(Enum):
     PT = 1
