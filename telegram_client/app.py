@@ -39,7 +39,7 @@ async def main() -> None:
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
     private_chat = '855531130'
     group_chat = '-1001673290336'
-    chat = private_chat
+    chat = group_chat
 
     await application.bot.send_message(chat_id=chat,
                                        text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
