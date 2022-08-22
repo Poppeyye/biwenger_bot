@@ -111,9 +111,8 @@ class BiwengerApi:
 
     def get_all_players_in_league(self):
         _, headers = self.get_account_info()
-        session = requests_cache.CachedSession('cache-requests', cache_control=True)
 
-        req = session.get(url_all_players, headers=headers).text
+        req = requests.get(url_all_players, headers=headers).text
         req_format = req.replace("jsonp_1465365486(", "")[:-1]
         all_players = json.loads(req_format)['data']['players']
         return all_players
@@ -141,14 +140,13 @@ class BiwengerApi:
                           "lang=es&fields=*,team,fitness,reports(points,home,events,status(status,statusInfo)," \
                           "match(*,round,home,away),star),prices,competition,seasons,news,threads&callback=jsonp_1505664437"
         _, headers = self.get_account_info()
-        session = requests_cache.CachedSession('extended_info', cache_control=True)
-        info = session.get(url_player_info, headers=headers).text
+        info = requests.get(url_player_info, headers=headers).text
         info_format = json.loads(info)['data']
         sofascore_url = info_format['partner']['2']["url"]
         canonical_url = info_format['canonicalURL']
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
-        last_season = [s for s in info_format['seasons'] if s['id'] == '2022'][0]
+        last_season = [s for s in info_format['seasons'] if s['id'] == '2022' or s['id'] == '2023'][0]
         matches_last_season = last_season['games']
         points_last_season = last_season['points'] if 'points' in last_season \
                                                       and isinstance(last_season['points'], str) else 0.0
