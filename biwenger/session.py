@@ -91,7 +91,7 @@ class BiwengerApi:
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
-        return [f for f in full_market_info if len(f)>5]
+        return [f for f in full_market_info if len(f) > 5]
 
     def _is_high_cost_player(self, player_id) -> bool:
         all_players = self.get_all_players_in_league()
@@ -146,10 +146,18 @@ class BiwengerApi:
         canonical_url = info_format['canonicalURL']
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
-        last_season = [s for s in info_format['seasons'] if s['id'] == '2022' or s['id'] == '2023'][0]
-        matches_last_season = last_season['games']
+        last_season = [s for s in info_format['seasons'] if s['id'] == '2022' and s['name'] ==
+                       'Temporada 2021/2022']
+        if not last_season:
+            last_season = {'games': 0, 'points': '0'}
+        else:
+            last_season = last_season[0]
+        if 'competition' in last_season:  # bug in the game, avoid segunda división players appear in stats
+            last_season['games'] = 0
+        matches_last_season = last_season['games'] if 'games' in last_season \
+                                                      and isinstance(last_season['games'], int) else 0
         points_last_season = last_season['points'] if 'points' in last_season \
-                                                      and isinstance(last_season['points'], str) else 0.0
+                                                      and isinstance(last_season['points'], str) else '0'
         try:
             real_avg_points = float(points_last_season) / float(matches_last_season)
         except:
