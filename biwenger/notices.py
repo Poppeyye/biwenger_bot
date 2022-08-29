@@ -127,6 +127,19 @@ class MatchNotice(Notice):
             return False
 
 
+class RoundsNotice(Notice):
+
+    def show(self, data):
+        if isinstance(data, str):
+            return "¡Jornada en curso!" + '\U0001f340'
+        elif isinstance(data, dict):
+            return '\U000023F1' + "Días hasta la siguiente jornada: " + str(self.days_diff(data['date']))
+
+    @staticmethod
+    def days_diff(d):
+        days = datetime.utcfromtimestamp(d) - datetime.today()
+        return " ".join([str(days.days), 'días', str(days.seconds // 3600), 'horas'])
+
 class Position(Enum):
     PT = 1
     DF = 2
