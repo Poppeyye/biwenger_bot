@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 
-from biwenger.notices import MarketNotice, TransfersNotice, MatchNotice
+from biwenger.notices import MarketNotice, TransfersNotice, MatchNotice, RoundsNotice
 from biwenger.session import BiwengerApi
 
 try:
@@ -60,14 +60,9 @@ async def main() -> None:
                                        show(biwenger.get_last_user_transfers()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
-""" 
-No funciona bien porque cada jornada es una request, buscar la manera de encontrar el calendario
-    matches = MatchNotice().show(biwenger.get_matches_info())
-    if matches:
-        await application.bot.send_message(chat_id=chat, text=matches,
-                                           disable_web_page_preview=True,
-                                           parse_mode='Markdown')
-"""
+    await application.bot.send_message(chat_id=chat, text=RoundsNotice().show(biwenger.get_next_round_time()),
+                                       disable_web_page_preview=True,
+                                       parse_mode='Markdown')
     # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
     # application.add_handler(CommandHandler("run_task", run_task))
 

@@ -3,12 +3,12 @@ import logging as logger
 import os
 from functools import lru_cache
 from operator import itemgetter
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import requests_cache
 import requests as requests
 
-from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice
+from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice, RoundsNotice
 
 url_login = 'https://biwenger.as.com/api/v2/auth/login'
 url_account = 'https://biwenger.as.com/api/v2/account'
@@ -117,6 +117,20 @@ class BiwengerApi:
         all_players = json.loads(req_format)['data']['players']
         return all_players
 
+    def get_next_round_time(self) -> Union[str, dict]:
+        _, headers = self.get_account_info()
+        req = requests.get(url_all_players, headers=headers).text
+        req_format = req.replace("jsonp_1465365486(", "")[:-1]
+        data = json.loads(req_format)['data']
+        events = data['events']
+        rounds = data['season']['rounds']
+        if 'active' in [r['status'] for r in rounds]:
+            return "active"
+        else:
+            next_round = [r for r in rounds if r['id'] == events[1]['round']['id']][0]
+            next_round.update({'date': events[1]['date']})
+            return next_round
+
     def get_last_user_transfers(self) -> List[Dict]:
         _, headers = self.get_account_info()
         transfers = requests.get(url_transfers, headers=headers).text
@@ -183,6 +197,5 @@ class BiwengerApi:
 
 if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    print(MatchNotice().show(biwenger.get_matches_info()))
-    print(MarketNotice().show(biwenger.get_players_in_market()))
+    print(RoundsNotice().show(biwenger.get_next_round_time()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
