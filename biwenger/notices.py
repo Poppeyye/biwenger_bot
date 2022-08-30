@@ -131,9 +131,9 @@ class RoundsNotice(Notice):
 
     def show(self, data):
         if isinstance(data, str):
-            return "¡Jornada en curso!" + '\U0001f340'
+            return "*¡Jornada en curso!*" + '\U0001f340'
         elif isinstance(data, dict):
-            return '\U000023F1' + "Días hasta la siguiente jornada: " + str(self.days_diff(data['date']))
+            return '\U000023F1' + "*Días hasta la siguiente jornada*: " + str(self.days_diff(data['date']))
 
     @staticmethod
     def days_diff(d):
