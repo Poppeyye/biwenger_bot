@@ -51,11 +51,13 @@ async def main() -> None:
     await application.bot.send_poll(chat_id= private_chat, question="Quién hará más puntos esta jornada?", 
                                     options=['yo', 'tu'])
     """
-
-    await application.bot.send_message(chat_id=chat,
-                                       text=MarketNotice().show(biwenger.get_players_in_market(free=False)),
-                                       disable_web_page_preview=True,
-                                       parse_mode='Markdown')
+    plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
+    msgs = [plys_user[i:i + 4096] for i in range(0, len(plys_user), 4096)]
+    for text in msgs:
+        await application.bot.send_message(chat_id=chat,
+                                           text=text,
+                                           disable_web_page_preview=True,
+                                           parse_mode='Markdown')
     await application.bot.send_message(chat_id=chat, text=TransfersNotice().
                                        show(biwenger.get_last_user_transfers()),
                                        disable_web_page_preview=True,

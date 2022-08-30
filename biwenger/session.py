@@ -127,8 +127,8 @@ class BiwengerApi:
         if 'active' in [r['status'] for r in rounds]:
             return "active"
         else:
-            next_round = [r for r in rounds if r['id'] == events[1]['round']['id']][0]
-            next_round.update({'date': events[1]['date']})
+            next_round = [r for r in rounds if r['id'] == events[0]['round']['id']][0]
+            next_round.update({'date': events[0]['date']})
             return next_round
 
     def get_last_user_transfers(self) -> List[Dict]:
@@ -202,3 +202,7 @@ if __name__ == '__main__':
     biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
     print(RoundsNotice().show(biwenger.get_next_round_time()))
     print(TransfersNotice().show(biwenger.get_last_user_transfers()))
+
+
+
+
