@@ -176,7 +176,10 @@ class BiwengerApi:
             real_avg_points = float(points_last_season) / float(matches_last_season)
         except:
             real_avg_points = 0.0
-        price_variance = ((last_5_prices[4] - last_5_prices[0]) / last_5_prices[0]) * 100
+        try:
+            price_variance = ((last_5_prices[4] - last_5_prices[0]) / last_5_prices[0]) * 100
+        except:
+            price_variance = 0.0
         avg_points_total = float(points_last_season) / 34
         return {"url": url,
                 "price_increment": "{:.2f}".format(price_variance),
