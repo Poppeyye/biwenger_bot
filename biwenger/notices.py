@@ -83,11 +83,18 @@ class TransfersNotice(Notice):
                     if "to" in mov.keys():
                         if int(mov["amount"]) > 12000000:
                             message.append(u'\U0001F525')
-                        message.append(" ".join([f'*{mov["name"]}*', "ficha por", f'*{str(mov["to"]["name"])}*', "por",
-                                                 "{:,}€".format((mov["amount"])),
-                                                 str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
-                                                 "% de diferencia sobre "
-                                                 "mercado desde hoy. \n"]))
+                        if mov['mov_type'] == 'clause':
+                            message.append(" ".join(["\U0001F400", "*Clausulazo!*", "la rata de",
+                                                     f'*{str(mov["to"]["name"])}*', "ha robado a", f'*{mov["name"]}*',
+                                                     "por", "{:,}€".format((mov["amount"])),
+                                                     str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                                                     "% de diferencia sobre su valor. \n"]))
+                        else:
+                            message.append(" ".join([f'*{mov["name"]}*', "ficha por", f'*{str(mov["to"]["name"])}*', "por",
+                                                     "{:,}€".format((mov["amount"])),
+                                                     str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                                                     "% de diferencia sobre "
+                                                     "mercado desde hoy. \n"]))
 
                         if "statusInfo" in mov.keys():
                             message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
@@ -139,6 +146,7 @@ class RoundsNotice(Notice):
     def days_diff(d):
         days = datetime.utcfromtimestamp(d) - datetime.today()
         return " ".join([str(days.days), 'días', str(days.seconds // 3600), 'horas'])
+
 
 class Position(Enum):
     PT = 1

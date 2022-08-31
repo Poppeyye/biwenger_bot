@@ -48,7 +48,7 @@ async def main() -> None:
     """
     Tiene sentido hacer una encuesta para saber quien va a ganar?
     almacenar resultados y mostrarlos cuando termine la jornada
-    await application.bot.send_poll(chat_id= private_chat, question="Quién hará más puntos esta jornada?", 
+    await application.bot.send_poll(chat_id= private_chat, question="Quién hará más puntos esta jornada?",
                                     options=['yo', 'tu'])
     """
     plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
