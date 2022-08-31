@@ -1,10 +1,13 @@
-import time
 from datetime import datetime, date, timedelta
 from enum import Enum
 from typing import List, Dict
 
 
 class Notice:
+    """
+    Notice class displays a custom message for any of the functionalities defined in the app.
+    You can create any notice by extending this class
+    """
     def template(self):
         """message template"""
         pass
@@ -43,7 +46,7 @@ class MarketNotice(Notice):
         prompted = []
         temp = self.template()
         if data[0]['user'] is None:
-            temp = temp + " *FREE AGENTS* \n" # edit template message if <free> flag is activated
+            temp = temp + " *FREE AGENTS* \n"  # edit template message if <free> flag is activated
         for log in data:
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
@@ -77,29 +80,35 @@ class TransfersNotice(Notice):
     def show(self, data):
         prompted = []
         for day in data:
-            if self.is_last_day_notice(day):
-                for mov in day['content']:
-                    message = []
-                    if "to" in mov.keys():
-                        if int(mov["amount"]) > 12000000:
-                            message.append(u'\U0001F525')
+            for mov in day['content']:
+                message = []
+                if "to" in mov.keys():
+                    if int(mov["amount"]) > 12000000:
+                        message.append(u'\U0001F525')
+                    if mov['mov_type'] == 'clause':
+                        message.append(" ".join(["\U0001F400", "*Clausulazo!*", "la rata de",
+                                                 f'*{str(mov["to"]["name"])}*', "ha robado a", f'*{mov["name"]}*',
+                                                 "por", "{:,}€".format((mov["amount"])),
+                                                 str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                                                 "% de diferencia sobre su valor. \n"]))
+                    else:
                         message.append(" ".join([f'*{mov["name"]}*', "ficha por", f'*{str(mov["to"]["name"])}*', "por",
                                                  "{:,}€".format((mov["amount"])),
                                                  str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
                                                  "% de diferencia sobre "
                                                  "mercado desde hoy. \n"]))
 
-                        if "statusInfo" in mov.keys():
-                            message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
-                        prompted.append(" ".join(message))
-                    elif "from" in mov.keys():
-                        message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",
-                                   "{:,}€".format((mov["amount"])),
-                                   str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
-                                   "% de diferencia sobre mercado. \n"]
-                        if "statusInfo" in mov.keys():
-                            message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
-                        prompted.append(" ".join(message))
+                    if "statusInfo" in mov.keys():
+                        message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
+                    prompted.append(" ".join(message))
+                elif "from" in mov.keys():
+                    message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",
+                               "{:,}€".format((mov["amount"])),
+                               str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                               "% de diferencia sobre mercado. \n"]
+                    if "statusInfo" in mov.keys():
+                        message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
+                    prompted.append(" ".join(message))
         prompted.insert(0, self.template())
         return "\n".join(prompted)
 
@@ -133,12 +142,42 @@ class RoundsNotice(Notice):
         if isinstance(data, str):
             return "*¡Jornada en curso!*" + '\U0001f340'
         elif isinstance(data, dict):
-            return '\U000023F1' + "*Días hasta la siguiente jornada*: " + str(self.days_diff(data['date']))
+            days_left = self.days_diff(data['date'])
+            if days_left < timedelta(hours=24):
+                blog_url = data['blog'] if 'blog' in data else ''
+                return " ".join(["\U000026BD", "*Hoy empieza la jornada!*", "\U000026BD\n",
+                                 "Consulta aquí las alineaciones probables -> ",
+                                 f'[{data["name"]}]({blog_url})'])
+            else:
+                format_date = str(self.format_timedelta(days_left))
+                return '\U000023F1' + "*Tiempo hasta la siguiente jornada*: " + format_date
 
     @staticmethod
     def days_diff(d):
-        days = datetime.utcfromtimestamp(d) - datetime.today()
-        return " ".join([str(days.days), 'días', str(days.seconds // 3600), 'horas'])
+        days = (datetime.utcfromtimestamp(d) + timedelta(hours=2)) - datetime.today()
+        return days
+
+    @staticmethod
+    def format_timedelta(delta: timedelta) -> str:
+        """Formats a timedelta duration to [N days] %H:%M:%S format"""
+        seconds = int(delta.total_seconds())
+
+        secs_in_a_day = 86400
+        secs_in_a_hour = 3600
+        secs_in_a_min = 60
+
+        days, seconds = divmod(seconds, secs_in_a_day)
+        hours, seconds = divmod(seconds, secs_in_a_hour)
+        minutes, seconds = divmod(seconds, secs_in_a_min)
+
+        time_fmt = f"{hours:02d}:{minutes:02d}"
+
+        if days > 0:
+            suffix = "s" if days > 1 else ""
+            return f"{days} día{suffix} {time_fmt}"
+
+        return time_fmt
+
 
 class Position(Enum):
     PT = 1
