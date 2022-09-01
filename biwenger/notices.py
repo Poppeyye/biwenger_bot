@@ -77,36 +77,35 @@ class TransfersNotice(Notice):
     def show(self, data):
         prompted = []
         for day in data:
-            if self.is_last_day_notice(day):
-                for mov in day['content']:
-                    message = []
-                    if "to" in mov.keys():
-                        if int(mov["amount"]) > 12000000:
-                            message.append(u'\U0001F525')
-                        if mov['mov_type'] == 'clause':
-                            message.append(" ".join(["\U0001F400", "*Clausulazo!*", "la rata de",
-                                                     f'*{str(mov["to"]["name"])}*', "ha robado a", f'*{mov["name"]}*',
-                                                     "por", "{:,}€".format((mov["amount"])),
-                                                     str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
-                                                     "% de diferencia sobre su valor. \n"]))
-                        else:
-                            message.append(" ".join([f'*{mov["name"]}*', "ficha por", f'*{str(mov["to"]["name"])}*', "por",
-                                                     "{:,}€".format((mov["amount"])),
-                                                     str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
-                                                     "% de diferencia sobre "
-                                                     "mercado desde hoy. \n"]))
+            for mov in day['content']:
+                message = []
+                if "to" in mov.keys():
+                    if int(mov["amount"]) > 12000000:
+                        message.append(u'\U0001F525')
+                    if mov['mov_type'] == 'clause':
+                        message.append(" ".join(["\U0001F400", "*Clausulazo!*", "la rata de",
+                                                 f'*{str(mov["to"]["name"])}*', "ha robado a", f'*{mov["name"]}*',
+                                                 "por", "{:,}€".format((mov["amount"])),
+                                                 str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                                                 "% de diferencia sobre su valor. \n"]))
+                    else:
+                        message.append(" ".join([f'*{mov["name"]}*', "ficha por", f'*{str(mov["to"]["name"])}*', "por",
+                                                 "{:,}€".format((mov["amount"])),
+                                                 str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                                                 "% de diferencia sobre "
+                                                 "mercado desde hoy. \n"]))
 
-                        if "statusInfo" in mov.keys():
-                            message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
-                        prompted.append(" ".join(message))
-                    elif "from" in mov.keys():
-                        message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",
-                                   "{:,}€".format((mov["amount"])),
-                                   str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
-                                   "% de diferencia sobre mercado. \n"]
-                        if "statusInfo" in mov.keys():
-                            message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
-                        prompted.append(" ".join(message))
+                    if "statusInfo" in mov.keys():
+                        message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
+                    prompted.append(" ".join(message))
+                elif "from" in mov.keys():
+                    message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",
+                               "{:,}€".format((mov["amount"])),
+                               str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
+                               "% de diferencia sobre mercado. \n"]
+                    if "statusInfo" in mov.keys():
+                        message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
+                    prompted.append(" ".join(message))
         prompted.insert(0, self.template())
         return "\n".join(prompted)
 

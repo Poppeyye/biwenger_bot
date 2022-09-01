@@ -45,12 +45,7 @@ async def main() -> None:
                                        text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
-    """
-    Tiene sentido hacer una encuesta para saber quien va a ganar?
-    almacenar resultados y mostrarlos cuando termine la jornada
-    await application.bot.send_poll(chat_id= private_chat, question="Quién hará más puntos esta jornada?",
-                                    options=['yo', 'tu'])
-    """
+
     plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
     msgs = [plys_user[i:i + 4096] for i in range(0, len(plys_user), 4096)]
     for text in msgs:

@@ -19,7 +19,7 @@ url_add_player_market = "https://biwenger.as.com/api/v2/market"
 url_all_players = "https://cf.biwenger.com/api/v2/competitions/la-liga/data?lang=es&score=5&callback=jsonp_1465365486"
 url_ranking = "https://biwenger.as.com/api/v2/rounds/league"
 url_movement_notice = "https://biwenger.as.com/api/v2/league/742220/board?type=playerMovements,teamMovements&limit=8"
-url_transfers = "https://biwenger.as.com/api/v2/league/742220/board?type=transfer,market,exchange,loan,loanReturn,clauseIncrement&limit=8"
+url_transfers = "https://biwenger.as.com/api/v2/league/742220/board?type=transfer,market"
 
 
 class BiwengerApi:
