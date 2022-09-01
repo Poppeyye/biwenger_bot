@@ -16,9 +16,8 @@ url_players_market = 'https://biwenger.as.com/api/v2/user?fields=players(id,owne
 url_players_league = 'https://biwenger.as.com/api/v2/players/la-liga/'
 url_retire_market = "https://biwenger.as.com/api/v2/market?player="
 url_add_player_market = "https://biwenger.as.com/api/v2/market"
-url_all_players = "https://cf.biwenger.com/api/v2/competitions/la-liga/data?lang=es&score=5&callback=jsonp_1465365486"
+url_all_players = "https://biwenger.as.com/api/v2/competitions/la-liga/data?lang=es&score=5"
 url_ranking = "https://biwenger.as.com/api/v2/rounds/league"
-url_movement_notice = "https://biwenger.as.com/api/v2/league/742220/board?type=playerMovements,teamMovements&limit=8"
 url_transfers = "https://biwenger.as.com/api/v2/league/742220/board?type=transfer,market"
 
 
@@ -113,22 +112,20 @@ class BiwengerApi:
         _, headers = self.get_account_info()
 
         req = requests.get(url_all_players, headers=headers).text
-        req_format = req.replace("jsonp_1465365486(", "")[:-1]
-        all_players = json.loads(req_format)['data']['players']
+        all_players = json.loads(req)['data']['players']
         return all_players
 
     def get_next_round_time(self) -> Union[str, dict]:
         _, headers = self.get_account_info()
         req = requests.get(url_all_players, headers=headers).text
-        req_format = req.replace("jsonp_1465365486(", "")[:-1]
-        data = json.loads(req_format)['data']
+        data = json.loads(req)['data']
         events = data['events']
         rounds = data['season']['rounds']
         if 'active' in [r['status'] for r in rounds]:
             return "active"
         else:
             next_round = [r for r in rounds if r['id'] == events[0]['round']['id']][0]
-            next_round.update({'date': events[0]['date']})
+            next_round.update({'date': events[0]['date'], 'blog': data['social']['blogLineup']})
             return next_round
 
     def get_last_user_transfers(self) -> List[Dict]:

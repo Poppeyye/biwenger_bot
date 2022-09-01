@@ -1,4 +1,3 @@
-import time
 from datetime import datetime, date, timedelta
 from enum import Enum
 from typing import List, Dict
@@ -43,7 +42,7 @@ class MarketNotice(Notice):
         prompted = []
         temp = self.template()
         if data[0]['user'] is None:
-            temp = temp + " *FREE AGENTS* \n" # edit template message if <free> flag is activated
+            temp = temp + " *FREE AGENTS* \n"  # edit template message if <free> flag is activated
         for log in data:
             if self.is_last_day_notice(log):
                 user = log['user']['name'] if log['user'] is not None else 'Mercado'
@@ -139,12 +138,40 @@ class RoundsNotice(Notice):
         if isinstance(data, str):
             return "*¡Jornada en curso!*" + '\U0001f340'
         elif isinstance(data, dict):
-            return '\U000023F1' + "*Días hasta la siguiente jornada*: " + str(self.days_diff(data['date']))
+            days_left = self.days_diff(data['date'])
+            if days_left < timedelta(hours=24):
+                blog_url = data['blog']
+                return " ".join(["\U000026BD", "*Hoy empieza la jornada!*", "\U000026BD\n",
+                                 "Consulta aquí las alineaciones probables -> ",
+                                 f'[{data["name"]}]({blog_url})'])
+            else:
+                format_date = str(self.format_timedelta(days_left))
+                return '\U000023F1' + "*Tiempo hasta la siguiente jornada*: " + format_date
+
+    def days_diff(self, d):
+        days = (datetime.utcfromtimestamp(d) + timedelta(hours=2)) - datetime.today()
+        return days
 
     @staticmethod
-    def days_diff(d):
-        days = datetime.utcfromtimestamp(d) - datetime.today()
-        return " ".join([str(days.days), 'días', str(days.seconds // 3600), 'horas'])
+    def format_timedelta(delta: timedelta) -> str:
+        """Formats a timedelta duration to [N days] %H:%M:%S format"""
+        seconds = int(delta.total_seconds())
+
+        secs_in_a_day = 86400
+        secs_in_a_hour = 3600
+        secs_in_a_min = 60
+
+        days, seconds = divmod(seconds, secs_in_a_day)
+        hours, seconds = divmod(seconds, secs_in_a_hour)
+        minutes, seconds = divmod(seconds, secs_in_a_min)
+
+        time_fmt = f"{hours:02d}:{minutes:02d}"
+
+        if days > 0:
+            suffix = "s" if days > 1 else ""
+            return f"{days} día{suffix} {time_fmt}"
+
+        return time_fmt
 
 
 class Position(Enum):
