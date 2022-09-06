@@ -1,4 +1,6 @@
 /.ipynb_checkpoints/
 /.idea/
 /venv/
-*.pyc
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
