@@ -1,6 +1,7 @@
 # Biwenger Bot for telegram
-==========
-** This bot can be scheduled to show an update of your current league in Biwenger Game **
+
+_This bot can be scheduled to show an update of your current league in Biwenger Game_
+
 * Any contribution will be more than welcome *
 * Some ideas = advanced statistics, post automatic offers and sales, reject or accept offers automatically, explore 
 * any available data, add new football apis or public data, predict bids price...
