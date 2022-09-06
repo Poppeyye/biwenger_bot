@@ -4,6 +4,10 @@ from typing import List, Dict
 
 
 class Notice:
+    """
+    Notice class displays a custom message for any of the functionalities defined in the app.
+    You can create any notice by extending this class
+    """
     def template(self):
         """message template"""
         pass
@@ -140,7 +144,7 @@ class RoundsNotice(Notice):
         elif isinstance(data, dict):
             days_left = self.days_diff(data['date'])
             if days_left < timedelta(hours=24):
-                blog_url = data['blog']
+                blog_url = data['blog'] if 'blog' in data else ''
                 return " ".join(["\U000026BD", "*Hoy empieza la jornada!*", "\U000026BD\n",
                                  "Consulta aquí las alineaciones probables -> ",
                                  f'[{data["name"]}]({blog_url})'])
@@ -148,7 +152,8 @@ class RoundsNotice(Notice):
                 format_date = str(self.format_timedelta(days_left))
                 return '\U000023F1' + "*Tiempo hasta la siguiente jornada*: " + format_date
 
-    def days_diff(self, d):
+    @staticmethod
+    def days_diff(d):
         days = (datetime.utcfromtimestamp(d) + timedelta(hours=2)) - datetime.today()
         return days
 

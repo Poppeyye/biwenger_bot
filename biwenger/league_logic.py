@@ -5,10 +5,7 @@ from functools import lru_cache
 from operator import itemgetter
 from typing import List, Dict, Union
 
-import requests_cache
 import requests as requests
-
-from biwenger.notices import Notice, MarketNotice, TransfersNotice, MatchNotice, RoundsNotice
 
 url_login = 'https://biwenger.as.com/api/v2/auth/login'
 url_account = 'https://biwenger.as.com/api/v2/account'
@@ -49,8 +46,9 @@ class BiwengerApi:
         result = requests.get(url_account, headers=headers).json()
         if result['status'] == 200:
             logger.info("call login ok!")
-        id_league = result['data']['leagues'][1]['id']
-        id_user = result['data']['leagues'][1]['user']['id']
+        league_info = [x for x in result['data']['leagues'] if x['name'] == os.getenv("BIWENGER_LEAGUE_NAME")][0]
+        id_league = league_info['id']
+        id_user = league_info['user']['id']
         headers_league = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*',
                           'X-Lang': 'es',
                           'X-League': repr(id_league), 'X-User': repr(id_user), 'Authorization': self.auth}
@@ -70,7 +68,6 @@ class BiwengerApi:
 
         full_market_info = []
         account_info, headers = self.get_account_info()
-        # league = account_info['data']['leagues'][1]  # Pick first one
         result = requests.get(url_add_player_market, headers=headers).json()
         market_players = result['data']['sales']
         # mkt_players_df = pd.DataFrame.from_dict(market_players)
@@ -85,14 +82,20 @@ class BiwengerApi:
                 player = all_players[str(p)]
                 offer.update(player)
                 offer.update(self.get_player_extended_information(str(p)))
-            except:
-                print('Player not found')
+            except NameError:
+                # Sometimes we can't match players with it's id... working on solutions
+                logger.warning(f'Player {p} not found')
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
         return [f for f in full_market_info if len(f) > 5]
 
     def _is_high_cost_player(self, player_id) -> bool:
+        """
+        If player is in top 20 by price we show a custom message in market notice
+        :param player_id:
+        :return:
+        """
         all_players = self.get_all_players_in_league()
         top_n_players = sorted(list(all_players.values()), key=itemgetter('price'), reverse=True)[:20]
         for p in top_n_players:
@@ -101,6 +104,11 @@ class BiwengerApi:
         return False
 
     def _is_top_player(self, player_id) -> bool:
+        """
+        If player is in top 20 by points we show a custom message in market notice
+        :param player_id:
+        :return:
+        """
         all_players = self.get_all_players_in_league()
         top_n_players = sorted(list(all_players.values()), key=itemgetter('points'), reverse=True)[:20]
         for p in top_n_players:
@@ -110,12 +118,15 @@ class BiwengerApi:
 
     def get_all_players_in_league(self):
         _, headers = self.get_account_info()
-
         req = requests.get(url_all_players, headers=headers).text
         all_players = json.loads(req)['data']['players']
         return all_players
 
     def get_next_round_time(self) -> Union[str, dict]:
+        """
+        Get exact time till next round. Get the url of possible line-ups for the last day before round.
+        :return:
+        """
         _, headers = self.get_account_info()
         req = requests.get(url_all_players, headers=headers).text
         data = json.loads(req)['data']
@@ -125,10 +136,16 @@ class BiwengerApi:
             return "active"
         else:
             next_round = [r for r in rounds if r['id'] == events[0]['round']['id']][0]
-            next_round.update({'date': events[0]['date'], 'blog': data['social']['blogLineup']})
+            next_round.update({'date': events[0]['date']})
+            if 'blogLineup' in data['social']:
+                next_round.update({'blog': data['social']['blogLineup']})
             return next_round
 
     def get_last_user_transfers(self) -> List[Dict]:
+        """
+        Get last movements done in the league. Includes sales, purchases and clauses.
+        :return:
+        """
         _, headers = self.get_account_info()
         transfers = requests.get(url_transfers, headers=headers).text
         movs = []
@@ -141,13 +158,19 @@ class BiwengerApi:
                     mov_type = mov['type'] if 'type' in mov else 'transfer'
                     mov.update(info_player)
                     mov.update({'mov_type': mov_type})
-                except:
+                except NameError:
                     print(f'Player {mov["player"]} not found')
             content = list(filter(lambda x: len(x) > 4, content))
             movs.append({'date': day['date'], 'content': content})
         return movs
 
     def get_player_extended_information(self, id_player: str):
+        """
+        Get advanced statistics from each player.
+        Custom url is used passing player slug to resolve it
+        :param id_player:
+        :return:
+        """
         url_player_info = f"https://biwenger.as.com/api/v2/players/la-liga/{id_player}?" \
                           f"https://cf.biwenger.com/api/v2/players/la-liga/{id_player}?" \
                           "lang=es&fields=*,team,fitness,reports(points,home,events,status(status,statusInfo)," \
@@ -186,22 +209,3 @@ class BiwengerApi:
                 "avg_total_points": "{:.2f}".format(avg_points_total),
                 "total_points_last": str(points_last_season),
                 "matches_played_last": matches_last_season}
-
-    def get_matches_info(self):
-        url_matches = 'https://cf.biwenger.com/api/v2/rounds/la-liga?score=5&lang=es&v=619&callback=jsonp_190019889'
-        _, headers = self.get_account_info()
-
-        req = requests.get(url_matches, headers=headers).text
-        req_format = req.replace("jsonp_190019889(", "")[:-1]
-        matches = json.loads(req_format)
-        return matches['data']
-
-
-if __name__ == '__main__':
-    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    print(RoundsNotice().show(biwenger.get_next_round_time()))
-    print(TransfersNotice().show(biwenger.get_last_user_transfers()))
-
-
-
-
