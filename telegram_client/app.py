@@ -2,8 +2,8 @@ import asyncio
 import logging
 import os
 
-from biwenger.notices import MarketNotice, TransfersNotice, MatchNotice, RoundsNotice
-from biwenger.session import BiwengerApi
+from biwenger.notices import MarketNotice, TransfersNotice, RoundsNotice
+from biwenger.league_logic import BiwengerApi
 
 try:
     from telegram import __version_info__
@@ -12,8 +12,7 @@ except ImportError:
 
 if __version_info__ < (20, 0, 0, "alpha", 1):
     raise RuntimeError("Incompatible version")
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application
 
 # Enable logging
 logging.basicConfig(
@@ -21,32 +20,21 @@ logging.basicConfig(
 )
 
 
-"""
-Example of command handler
-async def init_biwenger_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    # await update.message.reply_text('[tag](link))', parse_mode='MarkdownV2')
-    await update.message.reply_text(MarketNotice().show(biwenger.get_players_in_market()), parse_mode='Markdown')
-    await update.message.reply_text(TransfersNotice().show(biwenger.get_last_user_transfers()), parse_mode='Markdown')
-    """
-
-
 async def main() -> None:
     """Run bot."""
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
-    # on different commands - answer in Telegram
-    biwenger = BiwengerApi('alvarito174@hotmail.com', os.getenv("USER_PASS"))
-    private_chat = '855531130'
-    group_chat = '-1001673290336'
-    chat = group_chat
-
+    # Init Client
+    biwenger = BiwengerApi(os.getenv("USER_MAIL"), os.getenv("USER_PASS"))
+    chat = os.getenv("TELEGRAM_ID_CHAT")
+    # Main functionalities
     await application.bot.send_message(chat_id=chat,
                                        text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
 
     plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
+    # Telegram limits every message to 4096 bytes, so we split the message if limit is exceeded
     msgs = [plys_user[i:i + 4096] for i in range(0, len(plys_user), 4096)]
     for text in msgs:
         await application.bot.send_message(chat_id=chat,
@@ -60,14 +48,13 @@ async def main() -> None:
     await application.bot.send_message(chat_id=chat, text=RoundsNotice().show(biwenger.get_next_round_time()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
-    # application.add_handler(CommandHandler("biwenger", init_biwenger_session))
-    # application.add_handler(CommandHandler("run_task", run_task))
-
-
-# Run the bot until the user presses Ctrl-C
-    #application.run_polling()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
-    #asyncio.run(send_message_to_chat_id())
+    env_vars = ["TELEGRAM_TOKEN", "TELEGRAM_ID_CHAT", "USER_MAIL", "USER_PASS"]
+    for x in env_vars:
+        if x not in os.environ:
+            logging.error(f'{x} env variable not defined')
+            exit(1)
+
+    asyncio.run(main())  # startpoint
