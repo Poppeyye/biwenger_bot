@@ -56,6 +56,7 @@ class MarketNotice(Notice):
                 pos = log['position']
                 message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",
+                           f'_Team_: {log["team"]}\n',
                            f'_% Minutes Played_: {log["per_min_played"]}\n',
                            f'_Matches not played_: {log["matches_bench"]}\n',
                            f'_Total points_: {str(log["points"])}\n',

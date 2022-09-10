@@ -70,7 +70,7 @@ class BiwengerApi:
         account_info, headers = self.get_account_info()
         result = requests.get(url_add_player_market, headers=headers).json()
         market_players = result['data']['sales']
-        # teams = self.get_teams_in_league()
+        teams = self.get_teams_in_league()
         if free:
             market_players = [p for p in market_players if p['user'] is None]
         else:
@@ -82,12 +82,14 @@ class BiwengerApi:
                 player = all_players[str(p)]
                 offer.update(player)
                 offer.update(self.get_player_extended_information(str(p)))
+                offer.update({'team': teams[str(offer['teamID'])]})
             except NameError:
                 # Sometimes we can't match players with it's id... working on solutions
                 logger.warning(f'Player {p} not found')
             if self._is_high_cost_player(p):
                 offer.update({"is_high_cost": self._is_high_cost_player(p)})
             full_market_info.append(offer)
+
         return [f for f in full_market_info if len(f) > 5]
 
     def _is_high_cost_player(self, player_id) -> bool:
@@ -182,9 +184,12 @@ class BiwengerApi:
             for r in round_not_played:
                 r['rawStats'] = {'minutesPlayed': 0}
 
-        total_minutes_played = sum([p['rawStats']['minutesPlayed'] for p in stats])
+        total_minutes_played = sum([p['rawStats']['minutesPlayed'] for p in stats if p['match']['status'] == 'finished'])
+
         matches_not_played = len([benchs for benchs in [mins['minutesPlayed']
-                                                        for mins in [z['rawStats'] for z in stats]] if benchs == 0])
+                                                        for mins in [z['rawStats']
+                                                                     for z in stats if z['match']['status'] ==
+                                                                     'finished']] if benchs == 0])
         per_min_played = "{:.2f}".format(total_minutes_played / absolute_minutes)
         return {'per_min_played': per_min_played, 'matches_bench': matches_not_played}
 
