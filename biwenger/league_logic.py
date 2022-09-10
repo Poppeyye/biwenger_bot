@@ -70,7 +70,7 @@ class BiwengerApi:
         account_info, headers = self.get_account_info()
         result = requests.get(url_add_player_market, headers=headers).json()
         market_players = result['data']['sales']
-        # mkt_players_df = pd.DataFrame.from_dict(market_players)
+        # teams = self.get_teams_in_league()
         if free:
             market_players = [p for p in market_players if p['user'] is None]
         else:
@@ -122,6 +122,11 @@ class BiwengerApi:
         all_players = json.loads(req)['data']['players']
         return all_players
 
+    def get_teams_in_league(self):
+        _, headers = self.get_account_info()
+        teams = requests.get(url_all_players, headers=headers).json()['data']['teams']
+        return {k: v['name'] for k, v in teams.items()}
+
     def get_next_round_time(self) -> Union[str, dict]:
         """
         Get exact time till next round. Get the url of possible line-ups for the last day before round.
@@ -164,6 +169,25 @@ class BiwengerApi:
             movs.append({'date': day['date'], 'content': content})
         return movs
 
+    @staticmethod
+    def raw_stats_analysis(stats: dict):
+        """
+        Percentage of minutes played by each player | n of matches in bench
+        :param stats:
+        :return:
+        """
+        absolute_minutes = len(stats) * 90
+        round_not_played = [z for z in stats if 'rawStats' not in z]
+        if round_not_played:
+            for r in round_not_played:
+                r['rawStats'] = {'minutesPlayed': 0}
+
+        total_minutes_played = sum([p['rawStats']['minutesPlayed'] for p in stats])
+        matches_not_played = len([benchs for benchs in [mins['minutesPlayed']
+                                                        for mins in [z['rawStats'] for z in stats]] if benchs == 0])
+        per_min_played = "{:.2f}".format(total_minutes_played / absolute_minutes)
+        return {'per_min_played': per_min_played, 'matches_bench': matches_not_played}
+
     def get_player_extended_information(self, id_player: str):
         """
         Get advanced statistics from each player.
@@ -180,6 +204,7 @@ class BiwengerApi:
         info_format = json.loads(info)['data']
         sofascore_url = info_format['partner']['2']["url"]
         canonical_url = info_format['canonicalURL']
+        raw_stats = self.raw_stats_analysis(info_format['reports'])
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
         last_season = [s for s in info_format['seasons'] if s['id'] == '2022' and s['name'] ==
@@ -203,9 +228,11 @@ class BiwengerApi:
         except:
             price_variance = 0.0
         avg_points_total = float(points_last_season) / 34
-        return {"url": url,
-                "price_increment": "{:.2f}".format(price_variance),
-                "avg_points_per_match": "{:.2f}".format(real_avg_points),
-                "avg_total_points": "{:.2f}".format(avg_points_total),
-                "total_points_last": str(points_last_season),
-                "matches_played_last": matches_last_season}
+        extended_info = {"url": url,
+                         "price_increment": "{:.2f}".format(price_variance),
+                         "avg_points_per_match": "{:.2f}".format(real_avg_points),
+                         "avg_total_points": "{:.2f}".format(avg_points_total),
+                         "total_points_last": str(points_last_season),
+                         "matches_played_last": matches_last_season}
+        extended_info.update(raw_stats)
+        return extended_info

@@ -17,6 +17,8 @@ _This bot can be scheduled to show an update of your current league in Biwenger 
   * Last year stats
   * Last year avg (relative and absolute) points
   * Total matches played
+  * Percentage of minutes played
+  * Number of matches in the bench
 
 * Transfers Notice
   * Daily update of the market transfers (sales and purchases made by every user)
