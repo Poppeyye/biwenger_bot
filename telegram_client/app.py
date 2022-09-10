@@ -28,10 +28,6 @@ async def main() -> None:
     biwenger = BiwengerApi(os.getenv("USER_MAIL"), os.getenv("USER_PASS"))
     chat = os.getenv("TELEGRAM_ID_CHAT")
     # Main functionalities
-    await application.bot.send_message(chat_id=chat,
-                                       text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
-                                       disable_web_page_preview=True,
-                                       parse_mode='Markdown')
 
     plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
     # Telegram limits every message to 4096 bytes, so we split the message if limit is exceeded
@@ -45,6 +41,12 @@ async def main() -> None:
                                        show(biwenger.get_last_user_transfers()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')
+
+    await application.bot.send_message(chat_id=chat,
+                                       text=MarketNotice().show(biwenger.get_players_in_market(free=True)),
+                                       disable_web_page_preview=True,
+                                       parse_mode='Markdown')
+
     await application.bot.send_message(chat_id=chat, text=RoundsNotice().show(biwenger.get_next_round_time()),
                                        disable_web_page_preview=True,
                                        parse_mode='Markdown')

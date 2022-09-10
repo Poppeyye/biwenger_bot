@@ -8,6 +8,7 @@ class Notice:
     Notice class displays a custom message for any of the functionalities defined in the app.
     You can create any notice by extending this class
     """
+
     def template(self):
         """message template"""
         pass
@@ -55,6 +56,8 @@ class MarketNotice(Notice):
                 pos = log['position']
                 message = [f'*{user}*', 'vende a', f'[{log["name"]} ({Position(pos).name})]({log["url"]})', 'por',
                            "{:,}€".format((log["price"])), "\n",
+                           f'_% Minutes Played_: {log["per_min_played"]}\n',
+                           f'_Matches not played_: {log["matches_bench"]}\n',
                            f'_Total points_: {str(log["points"])}\n',
                            f'_Last 5d sum_: {str(points_last)}\n',
                            f'_Price trend 5d_: {log["price_increment"]}%',
