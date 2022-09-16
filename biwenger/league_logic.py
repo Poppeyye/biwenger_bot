@@ -165,7 +165,7 @@ class BiwengerApi:
                     mov_type = mov['type'] if 'type' in mov else 'transfer'
                     mov.update(info_player)
                     mov.update({'mov_type': mov_type})
-                except NameError:
+                except:
                     print(f'Player {mov["player"]} not found')
             content = list(filter(lambda x: len(x) > 4, content))
             movs.append({'date': day['date'], 'content': content})
