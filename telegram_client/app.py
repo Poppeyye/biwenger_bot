@@ -4,6 +4,7 @@ import os
 
 from biwenger.notices import MarketNotice, TransfersNotice, RoundsNotice
 from biwenger.league_logic import BiwengerApi
+from graphs.plotter import Plotter
 
 try:
     from telegram import __version_info__
@@ -28,10 +29,14 @@ async def main() -> None:
     biwenger = BiwengerApi(os.getenv("USER_MAIL"), os.getenv("USER_PASS"))
     chat = os.getenv("TELEGRAM_ID_CHAT")
     # Main functionalities
-
-    plys_user = MarketNotice().show(biwenger.get_players_in_market(free=False))
+    players_in_market = biwenger.get_players_in_market(free=True)
+    Plotter(data=players_in_market).line_plot()
+    plys_user = MarketNotice().show(players_in_market)
     # Telegram limits every message to 4096 bytes, so we split the message if limit is exceeded
     msgs = [plys_user[i:i + 4096] for i in range(0, len(plys_user), 4096)]
+    # plot_image = open("newplot.png", 'rb')
+
+    #await application.bot.send_photo(chat_id=chat, photo=plot_image)
     for text in msgs:
         await application.bot.send_message(chat_id=chat,
                                            text=text,

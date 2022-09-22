@@ -172,7 +172,7 @@ class BiwengerApi:
         return movs
 
     @staticmethod
-    def raw_stats_analysis(stats: dict):
+    def minutes_played(stats: dict):
         """
         Percentage of minutes played by each player | n of matches in bench
         :param stats:
@@ -209,7 +209,7 @@ class BiwengerApi:
         info_format = json.loads(info)['data']
         sofascore_url = info_format['partner']['2']["url"]
         canonical_url = info_format['canonicalURL']
-        raw_stats = self.raw_stats_analysis(info_format['reports'])
+        raw_stats = self.minutes_played(info_format['reports'])
         url = sofascore_url if sofascore_url != 'https://www.sofascore.com' else canonical_url
         last_5_prices = [price[1] for price in info_format['prices'][-5:]]
         last_season = [s for s in info_format['seasons'] if s['id'] == '2022' and s['name'] ==
@@ -240,4 +240,5 @@ class BiwengerApi:
                          "total_points_last": str(points_last_season),
                          "matches_played_last": matches_last_season}
         extended_info.update(raw_stats)
+        extended_info.update(info_format['analysis'])
         return extended_info
