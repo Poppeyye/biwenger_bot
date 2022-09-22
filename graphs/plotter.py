@@ -2,6 +2,7 @@ from typing import List
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 class Plotter:
@@ -31,9 +32,21 @@ class Plotter:
 
     def line_plot(self):
         df = self.data_of_interest()
-        fig = px.scatter(df, x="succesful_passes", y="per_min_played", color="name",
-                         facet_col="name", title="Using update_xaxes() With A Plotly Express Figure")
 
+        animals=['giraffes', 'orangutans', 'monkeys']
+        x = list(df.columns)
+        x.pop(0)
+        names = list(df['name'].values)
+        lucas = df[df['name'] == "Lucas Vázquez"].values.tolist()[0]
+        mojica = df[df['name'] == "Mojica"].values.tolist()[0]
+
+        lucas.pop(0)
+        fig = go.Figure(data=[
+            go.Bar(name=names[0], x=x, y=lucas[:-1]),
+            go.Bar(name="mojica", x=x, y=mojica[:-1])
+        ])
+        # Change the bar mode
+        fig.update_layout(barmode='group')
         fig.update_xaxes(showgrid=False)
 
         fig.show()
