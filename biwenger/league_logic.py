@@ -183,7 +183,8 @@ class BiwengerApi:
         if round_not_played:
             for r in round_not_played:
                 r['rawStats'] = {'minutesPlayed': 0}
-
+        # todo a veces no hay minutesPlayed
+        try:
         total_minutes_played = sum([p['rawStats']['minutesPlayed'] for p in stats if p['match']['status'] == 'finished'])
 
         matches_not_played = len([benchs for benchs in [mins['minutesPlayed']
