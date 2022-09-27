@@ -183,9 +183,13 @@ class BiwengerApi:
         if round_not_played:
             for r in round_not_played:
                 r['rawStats'] = {'minutesPlayed': 0}
-
-        total_minutes_played = sum([p['rawStats']['minutesPlayed'] for p in stats if p['match']['status'] == 'finished'])
-
+        try:
+            total_minutes_played = sum(
+                [p['rawStats']['minutesPlayed'] for p in stats if p['match']['status'] == 'finished'])
+        except:
+            match_no_minutes_informed = [p for p in stats if 'minutesPlayed' not in p['rawStats']]
+            for m in match_no_minutes_informed:
+                m['rawStats']['minutesPlayed'] = 0
         matches_not_played = len([benchs for benchs in [mins['minutesPlayed']
                                                         for mins in [z['rawStats']
                                                                      for z in stats if z['match']['status'] ==
