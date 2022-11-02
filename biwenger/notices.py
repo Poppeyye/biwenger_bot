@@ -103,7 +103,7 @@ class TransfersNotice(Notice):
                                                  "mercado desde hoy. \n"]))
 
                     if "statusInfo" in mov.keys():
-                        message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"], '\n']))
+                        message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"] or 'descarte', '\n']))
                     prompted.append(" ".join(message))
                 elif "from" in mov.keys():
                     message = [f'*{mov["from"]["name"]}*', "ha vendido a", f'*{mov["name"]}*', "a Mercado por",
