@@ -102,7 +102,7 @@ class TransfersNotice(Notice):
                                                  "% de diferencia sobre "
                                                  "mercado desde hoy. \n"]))
 
-                    if "statusInfo" in mov.keys():
+                    if "statusInfo" in mov.keys() and mov['statusInfo'] is not None:
                         message.append(" ".join([u'\U0001F915', 'Duda por:', mov["statusInfo"] or 'descarte', '\n']))
                     prompted.append(" ".join(message))
                 elif "from" in mov.keys():
@@ -110,7 +110,7 @@ class TransfersNotice(Notice):
                                "{:,}€".format((mov["amount"])),
                                str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
                                "% de diferencia sobre mercado. \n"]
-                    if "statusInfo" in mov.keys():
+                    if "statusInfo" in mov.keys() and mov['statusInfo'] is not None:
                         message.append(" ".join([u'\U0001F915', "Duda por:", mov['statusInfo'], "\n"]))
                     prompted.append(" ".join(message))
         prompted.insert(0, self.template())
