@@ -90,8 +90,13 @@ class TransfersNotice(Notice):
                     if int(mov["amount"]) > 12000000:
                         message.append(u'\U0001F525')
                     if mov['mov_type'] == 'clause':
-                        message.append(" ".join(["\U0001F400", "*Clausulazo!*", "la rata de",
-                                                 f'*{str(mov["to"]["name"])}*', "ha robado a", f'*{mov["name"]}*',
+                        user = {mov["from"]["name"]}
+                        user = 'Todos con muletas FC'
+                        message.append(" ".join(["\U0001F400",
+                                                 f'*Clausulazo a [{user}]'
+                                                 f'(tg://user?id={USERNAMES[user]})*',
+                                                 "la rata de", f'*{str(mov["to"]["name"])}*',
+                                                 "te ha robado a", f'*{mov["name"]}*',
                                                  "por", "{:,}€".format((mov["amount"])),
                                                  str(int((mov["amount"] - mov["price"]) * 100 / mov['price'])),
                                                  "% de diferencia sobre su valor. \n"]))
@@ -188,3 +193,19 @@ class Position(Enum):
     DF = 2
     MC = 3
     DL = 4
+
+
+USERNAMES = {
+    'Bendiciones': '5551610699',
+    'Ballanthinaikos': '15343579',
+    'hateritos': '1873714797',
+    # 'Simarcone': '5551610699',
+    'Todos con muletas FC': '855531130',
+    'Nakas Mouriñista': '1658739470',
+    'Jr7': '720629607',
+    'Javatojones El Indio del Manzanares': '5146325573',
+    'David Moutinho': '505128596',
+    'Dignam41': '5062278508',
+    'R.C. Deportivo de La Coruña': '5407150718',
+
+}
